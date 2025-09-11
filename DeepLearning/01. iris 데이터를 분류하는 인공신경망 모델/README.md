@@ -57,9 +57,9 @@ MLP 분류기를 생성한다.
 - `iris.data` 입력 특성이 4개여서, input 뉴런은 4개로 시작한다.  
 - `hidden_layer_sizes=(10, 10)` 은 은닉층 2개이며, 각 10개의 뉴런을 생성한다.  
 - `iris.target` 출력 특성이 3개여서, output 뉴런은 3개가 된다.  
-![neural_network](.images/neural_network.png)  
+![neural_network](./images/neural_network.png)  
 - 최대 반복 1000 epoch(정확히는 scikit-learn의 반복 스텝)  
-- 기본값은 아래와 같다.
+- 기본값은 아래와 같다.  
 | key                | value    |
 | ------------------ | -------- |
 | activation         | relu     |
@@ -71,13 +71,13 @@ MLP 분류기를 생성한다.
 
 `X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)`  
 데이터 8:2 분할(학습 120, 테스트 30)  
-`random_state=42` → 항상 같은 분할(재현성)
+`random_state=42` → 항상 같은 분할(재현성)  
 
 `model.fit(X_train, y_train)`  
 신경망 학습을 시작한다. (Adam 옵티마이저로 미니배치 학습)  
 
 `print("model accuracy:", model.score(X_test, y_test))`  
-테스트셋 정확도를 출력한다. (score는 기본으로 accuracy를 반환)
+테스트셋 정확도를 출력한다. (score는 기본으로 accuracy를 반환)  
 
 `print("Predictions:", model.predict(X_test))`  
 테스트셋에 대한 예측 레이블(정수 0/1/2) 배열을 출력한다.  
