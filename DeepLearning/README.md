@@ -1,10 +1,13 @@
-# 수업 환경
-| --- | --- | --- | --- |
-| OS | python | pip | developer tools |
-| Windows 11 | 3.12.10 | 25.2 | VsCode, PyCharm, Cursor |
+# 수업 환경  
+| OS                             | python  | pip  | developer tools         |
+|:------------------------------:|:-------:|:----:|:-----------------------:|
+| Windows11<br>wsl (ubuntu22.04) | 3.12.10 | 25.2 | VsCode, PyCharm, Cursor |
 
 ## Python 설치
-
+```
+sudo apt -y update
+sudo apt -y install 
+```
 
 ## 가상환경 설치 & 활성화
 
