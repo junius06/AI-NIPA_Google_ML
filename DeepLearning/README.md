@@ -2,6 +2,7 @@
 | OS                             | python  | pip  | developer tools         |
 |:------------------------------:|:-------:|:----:|:-----------------------:|
 | Windows11<br>wsl (ubuntu22.04) | 3.12.10 | 25.2 | VsCode, PyCharm, Cursor |
+<br>
 
 ## 1. Python 설치
 ```
