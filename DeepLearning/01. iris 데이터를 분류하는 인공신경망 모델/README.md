@@ -10,7 +10,12 @@
 patience  
 train  
 validation_split  
-epochs  
+epochs : 전체 데이터를 한 바퀴 다 학습하면 1 에폭  
+batch : 한 번에 학습에 쓰는 묶음 (작을수록 자주 고치고, 클수록 안정적이다.)  
+loss : 틀린 정도 (오차 : 낮을수록 좋음)  
+backprop : 역전파, 어떤 가중치를 어떻게 고쳐야 로스가 줄지 계산하는 절차  
+accuracy 정확도  
+
 batch_size  
 callbacks  
 val_accuracy  
@@ -71,18 +76,35 @@ MLP 분류기를 생성한다.
 | random_state       | None     | 
 
 `X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)`  
-데이터 8:2 분할(학습 120, 테스트 30)  
-`random_state=42` → 항상 같은 분할(재현성)  
+**iris.data**와 **iris.target**에는 150개의 샘플이 있고, test_size=0.2 는 테스트 비율이 **20%**라는 것을 의미한다.  
+20% 즉 8:2 비율로 분할하면 150개의 샘플의 테스트는 30개가 된다. (학습 120, 테스트 30)  
+(ps. _test_size_를 정수로 주면 정확히 그 개수만큼 테스트로 사용한다. ex: _test_size=30_)  
+`random_state=42` → 항상 같은 분할을 사용하도록 랜덤한 동작의 seed를 고정한다. `train_test_split`은 데이터를 섞어서(셔플) 학습/테스트를 나누는데, 이때 쓰는 난수 생성기의 시작값(seed)을 42로 고정하면 항상 같은 방식으로 섞이기 때문에 매번 같은 분할 결과(같은 샘플이 학습/테스트로 감)를 얻는다. : 같은 코드/데이터로 항상 같은 결과를 얻기 위한 재현성 필요시 사용한다. ex, 실험 기록/비교  
 
 `model.fit(X_train, y_train)`  
-신경망 학습을 시작한다. (Adam 옵티마이저로 미니배치 학습)  
+신경망 학습을 시작한다. 예측 > 틀린 것 확인(loss) > 수정(가중치 업데이트) 순서를 계속해서 반복한다.  
+1. 데이터를 섞고(shuffle) Adam 옵티마이저로 미니배치 단위로 나눠서 처리한다.  
+2. 예측 `순전파, forward`  
+- 입력(4) → 은닉층(10) → 은닉층(10) → 출력(3) 순서로 값을 보내 각 클래스 확률을 계산한다.  
+3. 오차 확인 `loss`  
+- 예측과 정답(y_train)을 비교해서 오차(loss)를 구한다.  
+4. 오차 추적 `역전파, backprop`  
+- 오차가 각 가중치, 바이어스에 얼마나 영향을 받았는지에 대한 기울기를 계산한다.  
+5. 업데이트  
+- Adam 옵티마이저가 기울기만큼 가중치/바이어스를 살짝 변경한다.  
+- 여러 배치, 여러 번 반복한다.  
+위 과정을 계속 반복할수록 오차가 점점 적어져 정답 클래스의 점수(확률)가 올라가도록 조정된다.  
 
 `print("model accuracy:", model.score(X_test, y_test))`  
-테스트셋 정확도를 출력한다. (score는 기본으로 accuracy를 반환)  
+테스트셋 **정확도**를 출력한다. (score는 기본으로 accuracy를 반환)  
+출력은 0과 1 사이의 실수이며, `맞춘 개수 / 전체 개수`로 계산한다.  
 
 `print("Predictions:", model.predict(X_test))`  
-테스트셋에 대한 예측 레이블(정수 0/1/2) 배열을 출력한다.  
-<br>
+테스트셋에 대한 **예측 레이블 배열**을 출력한다.  
+출력은 `길이 = 테스트 샘플 수`이고, 각 레이블의 숫자(0, 1, 2)는 품종 클래스를 의미한다.  
+> 클래스 이름으로 보고 싶다면 `names = iris.target_names` 을 사용한다.  
+> > 클래스 이름 : ['setosa', 'versicolor', 'virginica']   
+<br> 
 
 ### 2 cell
 ```
