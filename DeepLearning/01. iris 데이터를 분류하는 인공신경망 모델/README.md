@@ -104,8 +104,9 @@ MLP 분류기를 생성한다.
 출력은 `길이 = 테스트 샘플 수`이고, 각 레이블의 숫자(0, 1, 2)는 품종 클래스를 의미한다.  
 > 클래스 이름으로 보고 싶다면 `names = iris.target_names` 을 사용한다.  
 > > 클래스 이름 : ['setosa', 'versicolor', 'virginica']   
+<br>
 
-💡 Point!
+💡 **Point!**
 - score() = 정확도 = 맞춘비율  
 - predict() = 각 샘플의 예측 클래스 배열  
 <br> 
