@@ -60,6 +60,7 @@ MLP 분류기를 생성한다.
 ![neural_network](./images/neural_network.png)  
 - 최대 반복 1000 epoch(정확히는 scikit-learn의 반복 스텝)  
 - 기본값은 아래와 같다.  
+
 | key                | value    |
 | ------------------ | -------- |
 | activation         | relu     |
