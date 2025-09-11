@@ -43,4 +43,5 @@ rm -rf .venv                   # 필요시 폴더 삭제
 pip install tensorflow
 pip install scikit-learn
 pip install pandas
+pip install matplotlib
 ```
