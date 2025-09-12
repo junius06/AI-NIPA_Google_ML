@@ -109,14 +109,31 @@ MLP 분류기를 생성한다.
 💡 **Point!**
 - score() = 정확도 = 맞춘비율  
 - predict() = 각 샘플의 예측 클래스 배열  
-<br> 
+<br>
+
 
 ### 2 cell
 ```
 from sklearn.metrics import confusion_matrix
 print("Confusion Matrix:\n", confusion_matrix(y_test, model.predict(X_test)))
 ```
+**무엇을 하는 코드인가?**  
+1. confusion matrix를 계산해서 출력한다.  
+2. `X_test`에 대한 예측 레이블을 즉석에서 만들고(`model.predict(X_test)`), 그 예측과 실제 정답 `y_test`를 비교해 confusion matrix를 계산한 뒤 출력한다.  
+3. confusion matrix는 행=실제 클래스, 열=예측 클래스 이며, 각 칸은 해당 조합의 개수이다.  
 <br>
+
+`from sklearn.matrix import confusion_matrix`  
+scikit-learn의 metrics 모듈에서 confusion_matrix를 가져와서, confusion_matrix(...)를 직접 호출할 수 있게 된다.  
+`print("Confusion Matrix:\n", confusion_matrix(y_test, model.predict(X_test)))`  
+- 실행 순서  
+  - `model.predict(X_test)` → 테스트셋 각 샘플의 예측 레이블 배열을 만든다.  
+  - `confusion_matrix(y_test, <예측배열>)` → 행 = 실제 레이블(y_test), 열 = 예측 레이블 기준의 **빈도표(정수 행렬)**를 계산한다.  
+    - 크기 : `n_classes x n_classes` (iris는 보통 3x3)  
+    - 대각선 = 맞춘 개수, 대각선 밖 = 오분류 개수  
+    - 레이블 순서는 기본적으로 정렬된 고유값 순서를 사용한다.  
+<br>
+
 
 ### 3 cell
 ```
@@ -131,6 +148,46 @@ model.add(Dense(3, activation='softmax')) # output layer
 model.summary()
 ```
 <br>
+
+**무엇을 하는 코드인가?**  
+1. Keras로 다층 퍼셉트론(MLP) 분류 모델의 구조만 정의하고 요약을 출력한다.  
+<br>
+
+`from tensorflow.keras import Sequential`  
+Keras의 Sequential 클래스는 layer들을 **위에서 아래로 순차적으로** 쌓는 모델을 만들 때 사용한다.  
+
+`from tensorflow.keras.layers import Dense, Input`  
+Dense : 완전 연결(fully connected) 층  
+Input : 입력 텐서의 모양(shape)을 선언하는 층(배치 차원 제외)  
+
+`model = Sequential()`  
+빈 Sequential 모델을 생성한다. 이제 add()로 층을 차례대로 붙일 수 있다.  
+
+`model.add(Input(shape=(4,))) # input layer`  
+입력의 형상을 지정한다. 각 샘플은 길이 4의 벡터를 갖는다.  
+배치 차원은 제외하므로, 실제 입력 모양은 `(batch_size, 4)`가 된다.  
+여기서는 학습 파라미터인 가중치를 갖지 않는다.  
+
+`model.add(Dense(50, activation='sigmoid')) # hidden layer`  
+유닛 50개의 은닉층을 추가한다.  
+활성화 함수는 `sigmoid`이며, 이전 층의 모든 뉴런과 완전 연결된다.  
+
+`model.add(Dense(30, activation='sigmoid')) # hidden layer`  
+유닛 30개의 두 번째 은닉층으로, 활성화 함수는 `sigmoid`이다.  
+
+`model.add(Dense(3, activation='softmax')) # output layer`  
+유닛 3개의 출력층, `softmax`로 각 클래스의 확률(합=1)을 출력한다.  
+보통 3-classses 분류 문제를 대응할 때 이러한 형태를 사용한다.  
+
+`model.summary()`  
+모델 구조 요약을 출력한다. - 각 층의 출력 형태, 파라미터 수, 총 파라미터 수 등.  
+
+- 참고) 파라미터 수 계산 예시
+  - Dense(50) : (입력 4 x 유닛 50) + 바이어스 50 = 4*50 + 50 = 250  
+  - Dense(30) : (50 x 30) + 30 = 1530  
+  - Dense(3)  : (30 x 3) + 3 = 93  
+  - 총합 : 250 + 1530 + 93 = 1873 (Input층은 파라미터가 없다.)  
+    - 여기서 유닛(unit)이란 뉴런(node) 1개를 의미한다.  
 
 ### 4 cell
 ```
