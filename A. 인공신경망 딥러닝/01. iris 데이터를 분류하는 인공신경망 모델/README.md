@@ -189,6 +189,7 @@ Input : 입력 텐서의 모양(shape)을 선언하는 층(배치 차원 제외)
   - 총합 : 250 + 1530 + 93 = 1873 (Input층은 파라미터가 없다.)  
     - 여기서 유닛(unit)이란 뉴런(node) 1개를 의미한다.  
 
+
 ### 4 cell
 ```
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -196,11 +197,13 @@ model.fit(X_train, y_train, epochs=100, batch_size=50)
 ```
 <br>
 
+
 ### 5 cell
 ```
 print(model.evaluate(X_test, y_test))
 ```
 <br>
+
 
 ### 6 cell
 ```
@@ -208,12 +211,14 @@ model.save('iris_model.keras')
 ```
 <br>
 
+
 ### 7 cell
 ```
 from tensorflow.keras.models import load_model
 loaded_model = load_model('iris_model.keras')
 ```
 <br>
+
 
 ### 8 cell
 ```
