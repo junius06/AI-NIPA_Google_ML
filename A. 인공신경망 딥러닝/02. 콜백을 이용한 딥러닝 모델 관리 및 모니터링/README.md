@@ -26,6 +26,7 @@ tensorboard --logdir=logs
 
 ### 3. tensorboard 접속  
 로컬에서 `http://localhost:6006` 연결  
+![tensorboard](./images/tensorboard.png)  
 
 ## 무엇을 하는 코드인가?  
 iris 데이터를 3분류하는 Keras MLP 모델을 학습하고, 검증 정확도(`val_accuracy`)가 개선될 때마다 체크포인트 파일(`.h5`)을 저장하도록 설정한다.  
