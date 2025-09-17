@@ -22,7 +22,6 @@ python -m pip install --upgrade tensorboard
 tensorboard --logdir=logs
 ```
 <br>
-<br>
 
 ### 3. tensorboard 접속  
 로컬에서 `http://localhost:6006` 연결  
@@ -40,7 +39,6 @@ iris 데이터를 3분류하는 Keras MLP 모델을 학습하고, 검증 정확�
 - 학습 데이터를 80%(훈련) / 20%(검증)으로 내부 분할  
 - 배치 50으로 최대 100에폭 학습  
 - 각 에폭 종료 시 검증 정확도 계산하여, 이전 최고치보다 좋으면 체크포인트 저장  
-<br>
 <br>
 
 ## 코드 상세 설명  
@@ -91,7 +89,6 @@ early_stopping = EarlyStopping(monitor='val_accuracy', patience=20)
 - `callbacks=[checkpoint]` : 에폭마다 `val_accuracy` 개선 시 모델 저장  
 - EarlyStopping과 TensorBoard도 쓰려면 callbacks를 아래와 같이 정의  
   - `callbacks=[checkpoint, early_stopping, tensorboard]`
-<br>
 <br>
 <br>
 
