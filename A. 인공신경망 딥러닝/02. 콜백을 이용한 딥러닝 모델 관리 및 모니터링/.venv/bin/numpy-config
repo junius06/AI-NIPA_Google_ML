@@ -1,9 +1,0 @@
-#!/bin/sh
-'''exec' "/mnt/c/Codes/AI/AI-NIPA_Google_ML/A. 인공신경망 딥러닝/02. 콜백을 이용한 딥러닝 모델 관리 및 모니터링/.venv/bin/python" "$0" "$@"
-' '''
-import sys
-from numpy._configtool import main
-if __name__ == '__main__':
-    if sys.argv[0].endswith('.exe'):
-        sys.argv[0] = sys.argv[0][:-4]
-    sys.exit(main())
