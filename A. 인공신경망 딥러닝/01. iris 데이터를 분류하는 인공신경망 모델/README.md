@@ -163,19 +163,19 @@ Input : 입력 텐서의 모양(shape)을 선언하는 층(배치 차원 제외)
 `model = Sequential()`  
 빈 Sequential 모델을 생성한다. 이제 add()로 층을 차례대로 붙일 수 있다.  
 
-`model.add(Input(shape=(4,))) # input layer`  
+`model.add(Input(shape=(4,)))`  
 입력의 형상을 지정한다. 각 샘플은 길이 4의 벡터를 갖는다.  
 배치 차원은 제외하므로, 실제 입력 모양은 `(batch_size, 4)`가 된다.  
 여기서는 학습 파라미터인 가중치를 갖지 않는다.  
 
-`model.add(Dense(50, activation='sigmoid')) # hidden layer`  
+`model.add(Dense(50, activation='sigmoid'))`  
 유닛 50개의 은닉층을 추가한다.  
 활성화 함수는 `sigmoid`이며, 이전 층의 모든 뉴런과 완전 연결된다.  
 
-`model.add(Dense(30, activation='sigmoid')) # hidden layer`  
+`model.add(Dense(30, activation='sigmoid'))`  
 유닛 30개의 두 번째 은닉층으로, 활성화 함수는 `sigmoid`이다.  
 
-`model.add(Dense(3, activation='softmax')) # output layer`  
+`model.add(Dense(3, activation='softmax'))`  
 유닛 3개의 출력층, `softmax`로 각 클래스의 확률(합=1)을 출력한다.  
 보통 3-classses 분류 문제를 대응할 때 이러한 형태를 사용한다.  
 
@@ -197,11 +197,42 @@ model.fit(X_train, y_train, epochs=100, batch_size=50)
 ```
 <br>
 
+**무엇을 하는 코드인가?**  
+1. `학습 규칙(최적화/손실/지표)`을 설정하여 어떤 지표(accuracy)로 모델을 훈련·평가할지 지정한다.  
+2. 훈련 데이터를 배치 크기 50으로 나눠 100 에폭 동안 반복 학습하며, 손실을 줄이도록 가중치/바이어스를 업데이트하여 실제 학습을 실행한다.  
+<br>
+
+`model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])`  
+어떤 방식으로 학습·평가할지 ㄹ지정하여 훈련 설정을 고정한다.  
+- `optimizer='adam'`  
+  - Adam 옵티마이저를 사용하여 역전파로 계산한 기울기를 이용해 가중치/바이어스를 업데이트한다.  
+- `loss='sparse_categorical_crossentropy'`  
+  - 다중 클래스 분류용 크로스엔트로피를 손실한다.  
+  - 정수 레이블을 바로 넣을 때 사용한다.  
+  - 레이블이 원-핫 벡터라면 categorical_crossentropy를 써야 한다.  
+- `metrics=['accuracy']`  
+  - 훈련(및 검증/평가) 시 정확도를 함께 계산해 로그에 보여준다.
+
+`model.fit(X_train, y_train, epochs=100, batch_size=50)`  
+실제 학습을 수행한다.  
+- `epochs=100`
+  - 훈련 데이터를 100번 반복한다.  
+- `batch_size=50`
+  - 훈련 데이터를 한 번에 50개씩 미니배치로 나눠 업데이트한다.  
+  - (iris 예시에서 X_train이 120개라면) 에폭당 스텝 수 = ceil(120/50) = 3  
+    - 100 에폭이면 총 약 300번(3x100) 파라미터 업데이트가 일어난다.  
+    - 마지막 배치는 20개로 자동 처리된다.  
+
 
 ### 5 cell
 ```
 print(model.evaluate(X_test, y_test))
 ```
+<br>
+
+학습된 Keras 모델을 테스트셋으로 평가한다.  
+컴파일에서 지정한 loss와 metrics를 계산하고, 설정된 `metrics=['accuracy']` 기준으로 `test_loss, test_accuracy`를 반환한다.  
+그 후 `print(..)`로 그 값을 그대로 출력한다.  
 <br>
 
 
@@ -211,12 +242,27 @@ model.save('iris_model.keras')
 ```
 <br>
 
+현재 keras 모델을 파일로 저장한다. Kears 3의 권장 포맷인 `.keras`(zip기반 단일 파일)로 저장한다.  
+저장되는 사항은 아래와 같다.  
+- 모델 구조(레이어/하이퍼파라미터)  
+- 가중치/바이어스 값  
+- 훈련 설정(loss, optimizer, metrics)  
+- 옵티마이저 상태(학습을 이어서 재개 가능)  
+현재 직업 디렉터리에 `iris_model.keras`라는 파일로 저장된다. (같은 이름의 파일이 있으면 덮어쓰기)  
+**주의: `.h5`(HDF5)와 서로 호환되지 않으니 단순히 확장자만 바꿔 쓰면 안 된다.**
+<br>
+
 
 ### 7 cell
 ```
 from tensorflow.keras.models import load_model
 loaded_model = load_model('iris_model.keras')
 ```
+<br>
+
+Keras에서 저장된 모델을 파일로부터 복원하는 함수 load_model을 가져온다.  
+현재 작업 디렉터리에 있는 `iris_model.keras`파일을 읽어 모델을 메모리로 복원해 loaded_model 변수에 담는다.  
+모델 구조, 가중치/바이어스, compile 설정(loss/metrics/optimizer), 옵티마이저 상태 등이 복원된다.  
 <br>
 
 
@@ -229,3 +275,33 @@ X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test
 
 print(loaded_model.evaluate(X_test, y_test))
 ```
+<br>
+
+**무엇을 하는 코드인가?**  
+1. 저장해 둔 Keras모델(loaded_model)을 iris 테스트셋으로 평가해서 성능을 확인하는 코드다.  
+2. 순서  
+- iris 데이터 불러오기 -> 학습/테스트 8:2 분할(재현성 위해 random_state=24)  
+- `loaded_model.evaluate(X_test, y_test)`로 손실과 정확도를 계산  
+- `print(..)`로 `test_loss, test_accuracy` 출력  
+<br>
+
+`from sklearn.datasets import load_iris`  
+scikit-learn 내장 iris 데이터셋을 불러오는 함수 `load_iris`를 import한다.  
+
+`from sklearn.model_selection import train_test_split`  
+데이터셋을 학습용/테스트용으로 분리하는 유틸리티 함수 `train_test_split`을 import한다.  
+
+`iris = load_iris()`  
+iris 데이터셋을 메모리로 로드해서 iris 변수에 저장한다.  
+주요 속성으로는 `iris.data`(형상 `(150, 4)`인 특징), `iris.target`(형상 `(150,)`인 정수 레이블 0/1/2)이 있다.  
+
+`X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)`  
+특징과 레이블을 훈련/테스트로 8:2 비율로 나눈다.  
+전체 150개 중 훈련 120, 테스트 30개가 된다.  
+`random_state=42`로 셔플 시드를 고정해 항상 같은 분할을 얻는다.  
+
+`print(loaded_model.evaluate(X_test, y_test))`  
+저장되어 있던 Keras 모델 `loaded_model`을 테스트셋으로 평가한다.  
+`complie`때 지정된 **손실(loss)**과 **지표(metrics)**를 계산해 리스트로 반환한다.  
+- 이 때 모델은 `metrics=['accuracy']`였으므로 반환은 `[test_loss, test_accuracy]`.  
+`print(..)`로 그 값을 그대로 출력한다.  
