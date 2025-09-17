@@ -1,34 +1,92 @@
 # iris 데이터를 분류하는 인공신경망 모델  
 
 ## 알아야 하는 개념  
-#### 1. iris  
-**MLPClassifier**는 분류에서 `클래스 개수 = 출력 뉴런 수`로 맞춘다. (출력층은 소프트맥스)
+### 1. iris  데이터셋 기본  
+**MLPClassifier**는 분류에서 `클래스 개수 = 출력 뉴런 수`로 맞춘다. (출력층은 소프트맥스)  
 - iris.data         : (150, 4) 실수 특징  
-- iris.target       : (150,) 정수 레이블 {0, 1, 2} → 3 classes : (150,)은 넘파이 배열의 모양을 나타내는 표기이며, 뒤의 쉼표는 차원이 1개임을 보여주는 것이므로 1차원 배열에 원소가 150개라는 의미이다. 만약 (150, 1) 이 된다면 2차원(2D), 150행 1열의 세로(열) 벡터가 된다.  
+- iris.target       : (150,) 정수 레이블 벡터 {0, 1, 2}  
+  - `(150,)` 표기는 **1차원 배열**에 원소가 150개 라는 뜻  
+  - `(150,1)` 은 **2차원**(150행 1열) 열 벡터
+    - 3 classes : (150,)은 넘파이 배열의 모양을 나타내는 표기이며, 뒤의 쉼표는 차원이 1개임을 보여주는 것이므로 1차원 배열에 원소가 150개라는 의미이다. 만약 (150, 1) 이 된다면 2차원(2D), 150행 1열의 세로(열) 벡터가 된다.  
 - iris.target_names : 레이블 이름 배열 → ['setosa', 'versicolor', 'virginica']  
+- **분류 출력 크기**: 클래스 개수(=3) → 출력 유닛 3개(softmax 확률)  
 
-patience  
-train  
-validation_split  
-epochs : 전체 데이터를 한 바퀴 다 학습하면 1 에폭  
-batch : 한 번에 학습에 쓰는 묶음 (작을수록 자주 고치고, 클수록 안정적이다.)  
-loss : 틀린 정도 (오차 : 낮을수록 좋음)  
-backprop : 역전파, 어떤 가중치를 어떻게 고쳐야 로스가 줄지 계산하는 절차  
-accuracy 정확도  
+### 2. 데이터 분할 관련  
+- **train** : 모델이 학습하는 데이터  
+- **validation** : 학습 중 성능을 확인/튜닝(조기 종료 등)에 쓰는 데이터  
+- **test** : 최종 성능 확인용(학습/튜닝에 사용 금지)  
+- `train_test_split(..., test_size=0.2)` → **8:2 분할** (예: 120/30)  
+- `random_state` (=seed 고정)  
+  - 데이터를 섞는 순서(분할 결과)나 초기 가중치 등의 **난수성을 고정**해 **재현성** 확보  
+  - 예: `train_test_split(..., ramdom_state=42)`, `MLPClassifier(..., random_state=42)`  
 
-batch_size  
-callbacks  
-val_accuracy  
-<br><br>
+### 3. 학습 루프의 구성 요소  
+- **epoch** : **훈련 데이터 전체를 1바퀴** 다 학습한 것  
+  - Keras `fit(epoch=E)` → 정확히 E번  
+  - scikit-learn의 `MLPClassifier(max_iter=...)`:  
+    - `solver='adam'` / `sgd`일 때 **데이터에 대한 반복 횟수(에폭 수와 유사)** 의미  
+- **batch(미니배치)** : 한 번의 가중치 업데이트에 사용하는 **데이터 묶음** (작을수록 자주 고치고, 클수록 안정적이다.)  
+- **batch_size** :  
+  - *Keras* : `fit(..., batch_size=32)` 처럼 직접 지정  
+  - scikit-learn MLP : 기본 `batch_size='auto'` (보통 `min(200, n_samples)`)  
+- **shuffle** : 매 epoch마다 데이터를 섞어 학습 안정화(일반화) 도움  
+
+### 4. 손실/역전파/지표  
+- **loss(손실)** : 모델의 틀린 정도  
+  - 다중분류 : **크로스피엔트로피**(Keras: `categorical_crossentropy` / `sparse_categorical_crossentropy`, scikit-learn MLP: **log_loss** 내부 사용)  
+  - `sparse_categorical_crossentropy`: **정수 레이블**에 사용 (원-핫 필요 없음)  
+  - `categorical_crossentropy`: **원-핫 레이블**에 사용  
+- **backprop(역전파)** : 손실을 줄이도록 각 가중치의 **기울기(gradient)** 계산  
+- **optimizer(최적화)** : 가중치 업데이트 규칙 (예: *Adam*, SGD)  
+  - **learning rate**가 너무 크면 발산, 너무 작으면 수렴이 느림  
+- **accuracy(정확도)** : `맞춘 개수 / 전체 개수`  
+  - Keras `metrics=['accuracy']`면 `evaluate`가 `[loss, accuracy]` 반환  
+  - scikit-learn은 `model.score(X, y)`가 정확도  
+
+### 5. 검증/조기종료 (early stopping)  
+- **validation_split** :  
+  - *Keras* `fit(validation_split=0.2)` → 훈련 데이터 중 **20%를 검증**으로 자동 분리  
+  - scikit-learn MLP는 `early_stooping=True` 일 때 내부적으로 `validation_fraction` (기본 0.1)을 사용  
+- **patience** :  
+  - 개선이 없더라도 몇 epoch 더 기다릴지 **  
+  - 예: `EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)`  
+- **val_accuracy / val_loss** : 검증 세트에 대한 정확도/손실(과적합 진단에 유용)  
+
+### 6. 모델 구조/활성화/정규화  
+- **units(유닛)** = 뉴런 1개, `Dense(units=N)` → 출력 차원 `N`  
+- **activation(활성화)** :  
+  - **ReLU**(기본, 빠르고 효과적), **sigmoid**(출력이 0~1), **softmax**(다중분류 확률)  
+- **regularization(정규화)** :  
+  - scikit-learn MLP의 `alpha`는 **L2 규제 세기**(과적합 완화)  
+  - Keras에서도 `kernel_regularizer=l2(...)`, `dropout` 등 사용 가능  
+- **스케일링(중요)** :  
+  - MLP는 입력 스케일에 민감 → **표준화** 권장 (`StandardScaler` 파이프라인)  
+
+### 7. 예측과 해석  
+- **predict** : 각 샘플의 **클래스 라벨** (Iris에선 0/1/2)  
+- **predict_proba** : 각 클래스의 **확률 벡터**(softmax 출력, 합=1)  
+- **confusion matrix(혼동행렬)** : **실제 vs 예측** 빈도표(대각선=정답, 비대각=오분류)  
+- (필요시) **precision/recall/F1**로 클래스별 성능 확인  
+
+> *Tips*:  
+> - **재현성**이 중요하면 데이터 분할과 모델 둘 다 `random_state`를 고정하세요.  
+> - scikit-learn MLP를 쓸 땐 **입력 표준화**(예: `make_pipeline(StandardScaler(), MLPClassifier(...))`)가 수렴/성능에 크게 도움됩니다.  
+<br>
+<br>
+
 
 ## 중요한 하이퍼파라미터(hyper parameters)/기본값  
+```
 hidden_layer_sizes=(10,10): 은닉층 구조  
 activation='relu': 활성화 함수  
 solver='adam': 최적화 방식(작은/중간 데이터에 적합)  
 alpha=1e-4: L2 규제(과적합 완화)  
 max_iter=1000: 최대 반복 수  
 random_state=None: 가중치 초기화가 매 실행 달라질 수 있음 → 재현성 원하면 random_state=42 지정  
-<br><br>
+```
+<br>
+<br>
+
 
 ## 코드 상세 해설  
 ### 1 cell  
