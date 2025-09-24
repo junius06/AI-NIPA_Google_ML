@@ -65,4 +65,4 @@
 학습이 진행됨에 따라 손실이 감소하고 정확도가 증가하는지 확인할 수 있음.  
 <br>
 
-(Wine Quality)[https://archive.ics.uci.edu/dataset/186/wine+quality]
+[Wine Quality](https://archive.ics.uci.edu/dataset/186/wine+quality)
